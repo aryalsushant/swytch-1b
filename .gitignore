@@ -160,3 +160,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+
+# added by Joy
+!data/raw/bls_employment/*.xlsx
+!data/raw/economic_indicators/*.csv
