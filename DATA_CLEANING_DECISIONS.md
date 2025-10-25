@@ -1,13 +1,12 @@
 # Data Cleaning Decisions
 
-## Files NOT Included in Repository
 
 ### `cpsaat11b_cleaned.csv` - Not Using
 **What it contains:** 599 detailed occupation categories with age breakdowns
 
 **Why we're not using it:**
 - **Too granular for initial modeling** - 599 occupations vs 30 in cpsaat09 would make the model unnecessarily complex
-- **Single time point limitation** - Only contains 2024 data, not time-series data needed for forecasting
+- **Single time point limitation** - Only contains 2024 data, not time series data needed for forecasting
 - **Project scope** - Our goal is to identify broad career trends, not predict every specific job title
 - **Advisor guidance** - recommended starting with manageable dataset and 60/3 month train/test split
 
@@ -26,12 +25,12 @@
 
 ## What We ARE Using
 
-### `cpsaat09_cleaned.csv` ✅
+### `cpsaat09_cleaned.csv` 
 - **30 occupation categories** (Management, Healthcare, Technology, etc.)
 - **2024 employment numbers** 
 - Broad enough for trend identification, specific enough to be actionable
 
-### `train_data.csv` & `test_data.csv` ✅
+### `train_data.csv` & `test_data.csv` 
 - **81 months of economic indicators** (2019-2025)
   - Unemployment rate
   - Total employment  
