@@ -1,8 +1,7 @@
-"""
-Merge Employment Data with Economic Indicators
-Purpose: Combine cleaned BLS employment data with economic indicators.
-Creates final model-ready dataset with a 60/3 month train/test split.
-"""
+# merge Employment Data with economic indicators
+# purpose: Combine cleaned BLS employment data with economic indicators.
+# creates final model-ready dataset with a 60/3 month train/test split.
+
 
 import pandas as pd
 import numpy as np

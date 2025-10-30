@@ -1,11 +1,10 @@
-"""
-BLS Employment Data Cleaning Script
-Purpose: Clean and prepare BLS employment data for modeling.
-- filter to private sector only
-- standardize occupation categories
-- merge datasets
-- prep for integration with economic indicators
-"""
+# BLS Employment Data Cleaning Script
+# Purpose: Clean and prepare BLS employment data for modeling.
+# - filter to private sector only
+# - standardize occupation categories
+# - merge datasets
+# - prep for integration with economic indicators
+
 
 import pandas as pd
 import numpy as np
