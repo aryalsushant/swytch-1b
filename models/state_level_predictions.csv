@@ -1,0 +1,16 @@
+date,state,employment,predicted
+2025-01-01,Washington employment,82768.0,76100.555
+2025-02-01,Washington employment,83787.0,78411.516
+2025-03-01,Washington employment,81025.0,57774.266
+2025-01-01,California employment,93979.0,93726.07
+2025-02-01,California employment,94169.0,93455.31
+2025-03-01,California employment,93933.0,93584.05
+2025-01-01,Texas employment,49816.0,50353.598
+2025-02-01,Texas employment,49912.0,50355.1
+2025-03-01,Texas employment,49781.0,50454.742
+2025-01-01,Florida employment,34235.0,34668.633
+2025-02-01,Florida employment,34341.0,34239.766
+2025-03-01,Florida employment,34162.0,34239.766
+2025-01-01,Arizona employment,32157.0,32531.07
+2025-02-01,Arizona employment,32137.0,32478.818
+2025-03-01,Arizona employment,31985.0,32478.818
