@@ -132,15 +132,7 @@ dmypy.json
 *.ckpt
 *.safetensors
 
-# Data files
-*.csv
-*.xlsx
-*.xls
-*.parquet
-*.feather
-*.hdf
-*.json
-*.xml
+
 
 # Logs
 logs/
@@ -162,6 +154,3 @@ Thumbs.db
 *.temp
 
 
-# added by Joy
-!data/raw/bls_employment/*.xlsx
-!data/raw/economic_indicators/*.csv
