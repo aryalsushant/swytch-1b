@@ -31,11 +31,11 @@ print(f"Date range: {df['date'].min()} to {df['date'].max()}")
 
 # focus on top 5 aerospace states (excluding US TOTAL)
 top_states = [
-    'Washington employment',
-    'California employment', 
-    'Texas employment',
-    'Florida employment',
-    'Arizona employment'
+    'Washington',
+    'California', 
+    'Texas',
+    'Florida',
+    'Arizona'
 ]
 
 # filter to top states
@@ -84,7 +84,7 @@ print(f"  Test: {len(test)} records ({len(test)//len(top_states)} months per sta
 # features
 feature_cols = ['month_sin', 'month_cos', 'time_index',
                 'employment_lag1', 'employment_lag2', 'employment_lag3',
-                'unemployment_rate', 'gdp', 'job_postings_index'] + [col for col in df_states.columns if col.startswith('state_')]
+                'unemployment_rate', 'real_gdp'] + [col for col in df_states.columns if col.startswith('state_')]
 
 # remove features not in data
 feature_cols = [col for col in feature_cols if col in train.columns]
@@ -182,5 +182,42 @@ plt.tight_layout()
 plot_file = PLOTS_DIR / "state_level_forecasts.png"
 plt.savefig(plot_file, dpi=300, bbox_inches='tight')
 print(f"\nState forecasts plot saved: {plot_file}")
+
+#scaled version 
+y_min = min(test_results['employment'].min(), test_results['predicted'].min())
+y_max = max(test_results['employment'].max(), test_results['predicted'].max())
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+axes = axes.flatten()
+
+for idx, state in enumerate(top_states):
+    ax = axes[idx]
+    
+    state_test = test_results[test_results['state'] == state]
+    dates = [d.strftime('%Y-%m') for d in state_test['date']]
+    
+    ax.plot(dates, state_test['employment'], 'o-', 
+            label='Actual', linewidth=2, markersize=8, color='black')
+    ax.plot(dates, state_test['predicted'], 's--', 
+            label='Predicted', linewidth=2, markersize=8, color='#2E86AB')
+    
+    ax.set_title(state.replace(' employment', ''), fontsize=12, fontweight='bold')
+    ax.set_xlabel('Date', fontsize=10)
+    ax.set_ylabel('Employment', fontsize=10)
+
+    # *** Shared scale ***
+    ax.set_ylim(y_min * 0.95, y_max * 1.05)
+
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(axis='x', rotation=45)
+
+# hide unused subplot if 5 states only
+axes[-1].axis('off')
+
+plt.tight_layout()
+plot_file = PLOTS_DIR / "state_level_forecasts_scaled.png"
+plt.savefig(plot_file, dpi=300, bbox_inches='tight')
+print(f"\nState forecasts plot saved with scaled y-axis: {plot_file}")
+
 
 print("STATE-LEVEL FORECASTING COMPLETE")
