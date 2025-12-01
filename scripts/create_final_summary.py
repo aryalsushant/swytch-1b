@@ -32,7 +32,8 @@ print(f"  Total Months: {state_df['date'].nunique()}")
 print(f"  States Analyzed: {state_df['state'].nunique()}")
 
 # US Total employment trend
-us_total = state_df[state_df['state'] == 'U.S. TOTAL employment'].sort_values('date')
+us_total = state_df[state_df['state'] == 'U.S. TOTAL'].sort_values('date')
+
 
 print(f"\nU.S. Aerospace Employment:")
 print(f"  Starting (Jan 2020): {us_total.iloc[0]['employment']:,.0f}")
