@@ -1,63 +1,86 @@
-Labor Market Forecasting in the Aerospace Industry
---------------------------------------------------
+# Labor Market Forecasting in the Aerospace Industry
 
-TEAM MEMBERS
-Name | GitHub Handle | Contribution
-Sushant Aryal | @aryalsushant | Modeling, forecasting framework, data engineering
-Joy Avre | @avrejoy | Exploratory data analysis, dataset cleanup
-Lutfiyah Nawaz | @Luffy28 | Feature engineering, preprocessing
-Stephanie Ngu | @StephanieNgu | Visualization, results interpretation
-Deeya Rawat | @dya9 | Presentation prep, storytelling, coordination
+## 👥 Team Members
+| Name            | GitHub Handle     | Contribution |
+|-----------------|-------------------|--------------|
+| Sushant Aryal   | @aryalsushant     | Modeling, forecasting system, data engineering |
+| Joy Avre        | @avrejoy          | Exploratory data analysis, dataset cleanup |
+| Lutfiyah Nawaz  | @Luffy28          | Feature engineering, preprocessing |
+| Stephanie Ngu   | @StephanieNgu     | Visualization, results interpretation |
+| Deeya Rawat     | @dya9             | Presentation development, storytelling, coordination |
 
-PROJECT HIGHLIGHTS
-- Built a time-series forecasting system to predict aerospace employment trends at national and state levels.
-- Used ARIMA for national forecasting and XGBoost for multi-state modeling.
-- Achieved 0.25% MAPE nationally and 3.56% MAPE at the state level.
-- Delivered insights on employment recovery, high-growth regions, and economic drivers.
+## 🎯 Project Highlights
+- Built a forecasting system to predict aerospace employment at both national and state levels.
+- Used **ARIMA** for national forecasting and **XGBoost** for state-level modeling.
+- Reached **0.25% MAPE** (national) and **3.56% MAPE** (state).
+- Identified trends in post-COVID recovery, high-growth states, and macroeconomic drivers.
 
-SETUP AND INSTALLATION
+## 👩🏽‍💻 Setup and Installation
+```
 git clone https://github.com/aryalsushant/swytch-1b.git
 cd swytch-1b
 pip install -r requirements.txt
+```
 
-PROJECT OVERVIEW
-This project was developed as part of the Break Through Tech AI – AI Studio Challenge. 
-The goal was to understand aerospace employment patterns, identify recovery trends, and build predictive tools that support workforce planning.
+## 🏗️ Project Overview
+This project was developed for the Break Through Tech AI – AI Studio Challenge.
+The goal was to analyze aerospace employment from 2020–2025 and build forecasting tools to support workforce decision-making.
 
-DATA EXPLORATION
-Datasets used include BLS QCEW, FRED unemployment, FRED GDP, and Indeed job posting trends.
-Insights included strong post-COVID recovery, regional variation, and correlations with macroeconomic indicators.
+## 📊 Data Exploration
+### Data Sources
+| Source | Description | Frequency | Coverage |
+|--------|-------------|-----------|----------|
+| BLS QCEW | Aerospace employment (NAICS 3364) | Monthly | 2020–2025 |
+| FRED Unemployment | National unemployment rate | Monthly | 2019–2025 |
+| FRED GDP | Real GDP | Quarterly | 2019–2025 |
+| Indeed Job Postings | Job posting index | Monthly | 2020–2025 |
 
-MODEL DEVELOPMENT
-Models:
-- ARIMA(1,1,1) for national-level forecasting
-- XGBoost for state-level modeling with lagged features
+### EDA Insights
+- COVID-19 caused a steep employment decline followed by uneven recovery.
+- Strong correlation between employment, GDP, unemployment rate, and job postings.
+- Some states show stronger seasonality patterns.
+- Missing data required interpolation in specific months.
 
-RESULTS & KEY FINDINGS
-Performance:
-ARIMA National — 0.25% MAPE  
-XGBoost National — 0.43% MAPE  
-XGBoost State-Level — 3.56% MAPE  
+## 🧠 Model Development
+### Models Used
+1. **ARIMA (National Level)**
+   - Final model: ARIMA(1,1,1)
 
-Insights:
-- Strong national recovery trend  
-- Florida and Georgia were the fastest-growing states  
-- GDP and job postings were top predictors  
+2. **XGBoost (State Level)**
+   - Includes lagged variables and rolling averages.
 
-NEXT STEPS
-- Use SARIMAX or Prophet for improved seasonality modeling  
-- Try walk-forward validation  
-- Explore deep learning architectures  
-- Build a real-time dashboard  
+### Training Setup
+- Chronological train-test split
+- Metrics: MAPE, RMSE, R²
+- Baseline: naive rolling forecast
 
-LICENSE
+## 📈 Results & Key Findings
+### Performance Metrics
+| Model | Level | MAPE | RMSE | R² |
+|-------|--------|------|------|------|
+| ARIMA | National | 0.25% | 1,232 | 0.9987 |
+| XGBoost | National | 0.43% | 2,103 | 0.9965 |
+| XGBoost Multi-State | State | 3.56% | 2,847 | 0.9360 |
+
+### Insights
+- National employment recovered ~17% from COVID-era lows.
+- Fastest-growing states: Florida and Georgia.
+- Top predictors: GDP, job posting volume.
+
+## 🚀 Next Steps
+- Explore SARIMAX or Prophet for stronger seasonality handling.
+- Use walk-forward validation for time-series robustness.
+- Try LSTMs or other deep learning architectures.
+- Build a real-time workforce dashboard.
+
+## 📝 License
 MIT License
 
-REFERENCES
-- BLS QCEW  
-- FRED database  
-- ARIMA statsmodels documentation  
-- XGBoost documentation  
+## 📄 References
+- BLS QCEW
+- FRED datasets
+- ARIMA (statsmodels)
+- XGBoost documentation
 
-ACKNOWLEDGEMENTS
+## 🙏 Acknowledgements
 Thanks to Coach Elizabeth Parnell and Challenge Advisors Tim Liu and James Thompson.
