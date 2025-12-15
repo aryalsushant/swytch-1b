@@ -5,7 +5,7 @@
 |-----------------|-------------------|--------------|
 | Sushant Aryal   | @aryalsushant     | Modeling, forecasting system, data engineering |
 | Joy Avre        | @avrejoy          | Exploratory data analysis, dataset cleanup |
-| Lutfiyah Nawaz  | @Luffy28          | Feature engineering, preprocessing |
+| Lutfiyah Nawaz  | @Luffy28          | Feature engineering, preprocessing, data engineering |
 | Stephanie Ngu   | @StephanieNgu     | Visualization, results interpretation |
 | Deeya Rawat     | @dya9             | Presentation development, storytelling, coordination |
 
