@@ -4,10 +4,10 @@
 | Name            | GitHub Handle     | Contribution |
 |-----------------|-------------------|--------------|
 | Sushant Aryal   | @aryalsushant     | Modeling, forecasting system, data engineering |
-| Joy Avre        | @avrejoy          | Exploratory data analysis, dataset cleanup |
-| Lutfiyah Nawaz  | @Luffy28          | Feature engineering, preprocessing, data engineering |
-| Stephanie Ngu   | @StephanieNgu     | Visualization, results interpretation |
-| Deeya Rawat     | @dya9             | Presentation development, storytelling, coordination |
+| Joy Avre        | @avrejoy          | Exploratory data analysis, dataset cleanup, modeling, forecasting system |
+| Lutfiyah Nawaz  | @Luffy28          | Feature engineering, preprocessing, data engineering, modeling |
+| Stephanie Ngu   | @StephanieNgu     | Visualization, results interpretation, modeling, forecasting system |
+| Deeya Rawat     | @dya9             | Presentation development, storytelling, coordination, preprocessing |
 
 ## 🎯 Project Highlights
 - Built a forecasting system to predict aerospace employment at both national and state levels.
