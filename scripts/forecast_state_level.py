@@ -1,47 +1,47 @@
 # state level aerospace employment forecasting
-# predicts employment for top aerospace states
+# predicts employment for top aerospace states using XGBoost and ARIMA
+
 
 import pandas as pd
 import numpy as np
 import xgboost as xgb
+from statsmodels.tsa.arima.model import ARIMA
 from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 from pathlib import Path
 import pickle
 
+
 plt.style.use('seaborn-v0_8-darkgrid')
 
-# setup
+
+# setup directories
 DATA_DIR = Path("data/processed")
 MODEL_DIR = Path("models")
 PLOTS_DIR = Path("plots")
 MODEL_DIR.mkdir(exist_ok=True)
 PLOTS_DIR.mkdir(exist_ok=True)
 
-print("STATE-LEVEL AEROSPACE FORECASTING")
+
+print("STATE-LEVEL AEROSPACE FORECASTING WITH XGBOOST + ARIMA")
+
 
 # load data
 df = pd.read_csv(DATA_DIR / "state_aerospace_complete.csv")
 df['date'] = pd.to_datetime(df['date'])
 df = df.sort_values(['state', 'date']).reset_index(drop=True)
 
+
 print(f"\nData loaded: {df.shape}")
 print(f"States: {df['state'].nunique()}")
 print(f"Date range: {df['date'].min()} to {df['date'].max()}")
 
-# focus on top 5 aerospace states (excluding US TOTAL)
-top_states = [
-    'Washington employment',
-    'California employment', 
-    'Texas employment',
-    'Florida employment',
-    'Arizona employment'
-]
 
-# filter to top states
+# top 5 aerospace states (excluding US TOTAL)
+top_states = ['Washington', 'California', 'Texas', 'Florida', 'Arizona']
 df_states = df[df['state'].isin(top_states)].copy()
-
 print(f"\nFocusing on top {len(top_states)} states")
+
 
 # create time features
 df_states['month'] = df_states['date'].dt.month
@@ -50,137 +50,197 @@ df_states['month_sin'] = np.sin(2 * np.pi * df_states['month'] / 12)
 df_states['month_cos'] = np.cos(2 * np.pi * df_states['month'] / 12)
 df_states['time_index'] = (df_states['date'] - df_states['date'].min()).dt.days / 30
 
-# create lag features by state
+
+# lag features by state
 df_states = df_states.sort_values(['state', 'date'])
 df_states['employment_lag1'] = df_states.groupby('state')['employment'].shift(1)
 df_states['employment_lag2'] = df_states.groupby('state')['employment'].shift(2)
 df_states['employment_lag3'] = df_states.groupby('state')['employment'].shift(3)
 
+
 # one-hot encode states
 state_dummies = pd.get_dummies(df_states['state'], prefix='state')
 df_states = pd.concat([df_states, state_dummies], axis=1)
 
+
 # remove NaN from lags
 df_states = df_states.dropna(subset=['employment_lag1', 'employment_lag2', 'employment_lag3'])
-
 print(f"After feature engineering: {df_states.shape}")
 
+
 # train/test split: last 3 months per state for test
-train_data = []
-test_data = []
+train_data, test_data = [], []
+
 
 for state in top_states:
     state_df = df_states[df_states['state'] == state].sort_values('date')
     train_data.append(state_df.iloc[:-3])
     test_data.append(state_df.iloc[-3:])
 
+
 train = pd.concat(train_data).reset_index(drop=True)
 test = pd.concat(test_data).reset_index(drop=True)
+
 
 print(f"\nTrain/Test split:")
 print(f"  Training: {len(train)} records ({len(train)//len(top_states)} months per state)")
 print(f"  Test: {len(test)} records ({len(test)//len(top_states)} months per state)")
 
-# features
+
+# features for XGBoost
 feature_cols = ['month_sin', 'month_cos', 'time_index',
                 'employment_lag1', 'employment_lag2', 'employment_lag3',
-                'unemployment_rate', 'gdp', 'job_postings_index'] + [col for col in df_states.columns if col.startswith('state_')]
-
-# remove features not in data
+                'unemployment_rate', 'real_gdp'] + [col for col in df_states.columns if col.startswith('state_')]
 feature_cols = [col for col in feature_cols if col in train.columns]
 
-X_train = train[feature_cols]
-y_train = train['employment']
-X_test = test[feature_cols]
-y_test = test['employment']
+
+X_train, y_train = train[feature_cols], train['employment']
+X_test, y_test = test[feature_cols], test['employment']
+
 
 print(f"\nFeatures: {len(feature_cols)}")
 
+
 # train XGBoost
 print("\nTraining XGBoost model...")
-model = xgb.XGBRegressor(
-    n_estimators=100,
-    learning_rate=0.1,
-    max_depth=4,
-    random_state=42
-)
+xgb_model = xgb.XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=4, random_state=42)
+xgb_model.fit(X_train, y_train)
+print("XGBoost model trained successfully")
 
-model.fit(X_train, y_train)
-print("Model trained successfully")
 
-# predictions
-y_pred = model.predict(X_test)
+# XGBoost predictions
+y_pred_xgb = xgb_model.predict(X_test)
 
-# calculate metrics
-mape = mean_absolute_percentage_error(y_test, y_pred) * 100
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-r2 = r2_score(y_test, y_pred)
 
-print("MODEL PERFORMANCE")
-print(f"  MAPE: {mape:.2f}%")
-print(f"  RMSE: {rmse:,.2f}")
-print(f"  R2: {r2:.4f}")
+# save XGBoost model
+with open(MODEL_DIR / "xgboost_state_level.pkl", 'wb') as f:
+    pickle.dump(xgb_model, f)
+print(f"XGBoost model saved: {MODEL_DIR / 'xgboost_state_level.pkl'}")
 
-# save model
-model_file = MODEL_DIR / "xgboost_state_level.pkl"
-with open(model_file, 'wb') as f:
-    pickle.dump(model, f)
-print(f"\nModel saved: {model_file}")
 
-# predictions by state
+# create results dataframe
 test_results = test[['date', 'state', 'employment']].copy()
-test_results['predicted'] = y_pred
+test_results['xgb_predicted'] = y_pred_xgb
 
-predictions_file = MODEL_DIR / "state_level_predictions.csv"
-test_results.to_csv(predictions_file, index=False)
-print(f"Predictions saved: {predictions_file}")
 
-# performance by state
-print("PERFORMANCE BY STATE")
+# ARIMA predictions per state
+test_results['arima_predicted'] = np.nan
+for state in top_states:
+    state_train = train[train['state'] == state].sort_values('date')
+    state_test_idx = test_results[test_results['state'] == state].sort_values('date').index
+   
+    y_train_state = state_train['employment'].values
+   
+    # fit ARIMA(1,1,1)
+    arima_model = ARIMA(y_train_state, order=(1,1,1))
+    arima_fit = arima_model.fit()
+   
+    # forecast next 3 months
+    forecast = arima_fit.forecast(steps=len(state_test_idx))
+
+
+    # assign directly to the correct rows
+    test_results.loc[state_test_idx, 'arima_predicted'] = forecast
+
+
+# evaluate performance per state
+print("\nPERFORMANCE BY STATE (XGBoost vs ARIMA)")
+
 
 for state in top_states:
     state_test = test_results[test_results['state'] == state]
-    
-    if len(state_test) > 0:
-        state_mape = mean_absolute_percentage_error(
-            state_test['employment'], 
-            state_test['predicted']
-        ) * 100
-        
-        print(f"\n{state}:")
-        print(f"  MAPE: {state_mape:.2f}%")
-        print(f"  Actual: {state_test['employment'].values}")
-        print(f"  Predicted: {state_test['predicted'].values.astype(int)}")
+    y_true = state_test['employment'].values
+    y_xgb = state_test['xgb_predicted'].values
+    y_arima = state_test['arima_predicted'].values
+   
+    # XGBoost metrics
+    xgb_mape = mean_absolute_percentage_error(y_true, y_xgb) * 100
+    xgb_rmse = np.sqrt(mean_squared_error(y_true, y_xgb))
+    xgb_r2 = r2_score(y_true, y_xgb)
+   
+    # ARIMA metrics
+    arima_mape = mean_absolute_percentage_error(y_true, y_arima) * 100
+    arima_rmse = np.sqrt(mean_squared_error(y_true, y_arima))
+    arima_r2 = r2_score(y_true, y_arima)
+   
+    print(f"\n{state}:")
+    print(f"  XGBoost -> MAPE: {xgb_mape:.2f}%, RMSE: {xgb_rmse:,.0f}, R²: {xgb_r2:.3f}")
+    print(f"  ARIMA    -> MAPE: {arima_mape:.2f}%, RMSE: {arima_rmse:,.0f}, R²: {arima_r2:.3f}")
+    print(f"  Actual:   {y_true}")
+    print(f"  XGBoost:  {y_xgb.astype(int)}")
+    print(f"  ARIMA:    {y_arima.astype(int)}")
 
-# visualization: Predictions by state
+
+# visualization: XGBoost vs ARIMA
+#no scale
 fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 axes = axes.flatten()
 
+
 for idx, state in enumerate(top_states):
     ax = axes[idx]
-    
     state_test = test_results[test_results['state'] == state]
-    
     dates = [d.strftime('%Y-%m') for d in state_test['date']]
-    
-    ax.plot(dates, state_test['employment'], 'o-', 
-            label='Actual', linewidth=2, markersize=8, color='black')
-    ax.plot(dates, state_test['predicted'], 's--', 
-            label='Predicted', linewidth=2, markersize=8, color='#2E86AB')
-    
-    ax.set_title(state.replace(' employment', ''), fontsize=12, fontweight='bold')
+   
+    ax.plot(dates, state_test['employment'], 'o-', label='Actual', color='black', linewidth=2)
+    ax.plot(dates, state_test['xgb_predicted'], 's--', label='XGBoost', color='#2E86AB', linewidth=2)
+    ax.plot(dates, state_test['arima_predicted'], 'd--', label='ARIMA', color='#F18F01', linewidth=2)
+   
+    ax.set_title(state, fontsize=12, fontweight='bold')
     ax.set_xlabel('Date', fontsize=10)
     ax.set_ylabel('Employment', fontsize=10)
     ax.legend()
     ax.grid(True, alpha=0.3)
     ax.tick_params(axis='x', rotation=45)
 
-# hide unused subplot
+
+# hide unused subplot if needed
 axes[-1].axis('off')
 
-plt.tight_layout()
-plot_file = PLOTS_DIR / "state_level_forecasts.png"
-plt.savefig(plot_file, dpi=300, bbox_inches='tight')
-print(f"\nState forecasts plot saved: {plot_file}")
 
-print("STATE-LEVEL FORECASTING COMPLETE")
+plt.tight_layout()
+plot_file = PLOTS_DIR / "state_level_forecasts_xgb_arima_noscale.png"
+plt.savefig(plot_file, dpi=300, bbox_inches='tight')
+print(f"State forecasts plot (no scale) saved: {plot_file}")
+
+
+# with consistent y-axis scale
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+axes = axes.flatten()
+y_min = min(test_results['employment'].min(), test_results[['xgb_predicted','arima_predicted']].min().min())
+y_max = max(test_results['employment'].max(), test_results[['xgb_predicted','arima_predicted']].max().max())
+
+
+for idx, state in enumerate(top_states):
+    ax = axes[idx]
+    state_test = test_results[test_results['state'] == state]
+    dates = [d.strftime('%Y-%m') for d in state_test['date']]
+   
+    ax.plot(dates, state_test['employment'], 'o-', label='Actual', color='black', linewidth=2)
+    ax.plot(dates, state_test['xgb_predicted'], 's--', label='XGBoost', color='#2E86AB', linewidth=2)
+    ax.plot(dates, state_test['arima_predicted'], 'd--', label='ARIMA', color='#F18F01', linewidth=2)
+   
+    ax.set_title(state, fontsize=12, fontweight='bold')
+    ax.set_xlabel('Date', fontsize=10)
+    ax.set_ylabel('Employment', fontsize=10)
+    ax.set_ylim(y_min * 0.95, y_max * 1.05)
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+    ax.tick_params(axis='x', rotation=45)
+
+
+axes[-1].axis('off')
+plt.tight_layout()
+plot_file = PLOTS_DIR / "state_level_forecasts_xgb_arima.png"
+plt.savefig(plot_file, dpi=300, bbox_inches='tight')
+print(f"\nState forecasts plot saved with XGBoost + ARIMA: {plot_file}")
+
+
+# save combined predictions
+predictions_file = MODEL_DIR / "state_level_predictions_xgb_arima.csv"
+test_results.to_csv(predictions_file, index=False)
+print(f"\nPredictions saved: {predictions_file}")
+
+
+print("\nSTATE-LEVEL FORECASTING COMPLETE")
+
