@@ -3,7 +3,7 @@
 ## 👥 Team Members
 | Name            | GitHub Handle     | Contribution |
 |-----------------|-------------------|--------------|
-| Sushant Aryal   | @aryalsushant     | Modeling, forecasting system, data engineering |
+| Sushant Aryal   | @aryalsushant     | Data engineering, modeling, model evaluation, version control |
 | Joy Avre        | @avrejoy          | Exploratory data analysis, dataset cleanup, modeling, forecasting system |
 | Lutfiyah Nawaz  | @Luffy28          | Feature engineering, preprocessing, data engineering, modeling |
 | Stephanie Ngu   | @StephanieNgu     | Visualization, results interpretation, modeling, forecasting system |
